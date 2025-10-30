@@ -2,5 +2,4 @@
 *.html
 .env
 /out
-/scripts/py
 *__pycache__*
