@@ -1,0 +1,7 @@
+actual,forecast
+pv_actual,pv_forecast_interpolate
+wind_actual,wind_forecast_interpolate
+peak_hours_actual,peak_hours_forecast
+supply_ab1_actual,supply_ab1_forecast_interpolate
+supply_top,supply_top_forecast
+supply_bottom,supply_bottom_forecast

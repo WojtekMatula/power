@@ -1,0 +1,6 @@
+[submodule "jwm-data-downloader"]
+	path = jwm-data-downloader
+	url = git@github.com:WojtekMatula/jwm-data-downloader.git
+[submodule "data-downloader-package"]
+	path = data-downloader-package
+	url = git@github.com:WojtekMatula/data-downloader-package.git
