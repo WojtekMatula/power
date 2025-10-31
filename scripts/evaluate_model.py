@@ -20,6 +20,7 @@ def print_results(result, charts=False):
     rmse_actual = np.sqrt((results["error_actual"] ** 2).mean())
     print(f"MAE: {mae_actual:.2f}")
     print(f"RMSE: {rmse_actual:.2f}")
+    print(f"mean/std: {(results['model_profit'].mean() / results['model_profit'].std()):.2f}")
     cum_pnl_actual = results["model_profit"].cumsum()
     drawdowns_actual = cum_pnl_actual - cum_pnl_actual.cummax()
     max_drawdown_actual = drawdowns_actual.min()
@@ -36,6 +37,7 @@ def print_results(result, charts=False):
     rmse_forecast = np.sqrt((results["error_forecast"] ** 2).mean())
     print(f"MAE: {mae_forecast:.2f}")
     print(f"RMSE: {rmse_forecast:.2f}")
+    print(f"mean/std: {(results['model_profit'].mean() / results['model_profit'].std()):.2f}")
     cum_pnl_forecast = results["model_profit_forecast"].cumsum()
     drawdowns_forecast = cum_pnl_forecast - cum_pnl_forecast.cummax()
     max_drawdown_forecast = drawdowns_forecast.min()
@@ -97,7 +99,7 @@ def print_results(result, charts=False):
                 x=rolling_rmse_actual.index,
                 y=rolling_rmse_actual,
                 name="Actual RMSE",
-                line=dict(color="blue", width=2, dash="dash"),
+                line=dict(color="cyan", width=2, dash="dash"),  # Changed to cyan for better visibility
                 yaxis="y2",
             ),
             row=1,
@@ -109,7 +111,7 @@ def print_results(result, charts=False):
                 x=rolling_rmse_forecast.index,
                 y=rolling_rmse_forecast,
                 name="Forecast RMSE",
-                line=dict(color="red", width=2, dash="dash"),
+                line=dict(color="orange", width=2, dash="dash"),  # Changed to orange for better visibility
                 yaxis="y2",
             ),
             row=1,
@@ -117,13 +119,23 @@ def print_results(result, charts=False):
             secondary_y=True,
         )
 
-        # Update axes
-        fig.update_xaxes(title_text="Date", row=1, col=1)
+        # Update axes for dark mode
+        fig.update_xaxes(
+            title_text="Date",
+            row=1,
+            col=1,
+            gridcolor='rgba(255, 255, 255, 0.1)',
+            color='white',
+            zerolinecolor='rgba(255, 255, 255, 0.2)'
+        )
         fig.update_yaxes(
             title_text="Cumulative PnL (Actual & Forecast)",
             row=1,
             col=1,
             secondary_y=False,
+            gridcolor='rgba(255, 255, 255, 0.1)',
+            color='white',
+            zerolinecolor='rgba(255, 255, 255, 0.2)'
         )
         fig.update_yaxes(
             title_text="Rolling 14-day Mean RMSE (Actual & Forecast)",
@@ -131,18 +143,71 @@ def print_results(result, charts=False):
             col=1,
             secondary_y=True,
             side="right",
+            gridcolor='rgba(255, 255, 255, 0.1)',
+            color='white',
+            zerolinecolor='rgba(255, 255, 255, 0.2)'
         )
 
-        # Update layout
+        # Update layout for dark mode
         fig.update_layout(
             height=800,
             title_text="Interactive Combined Performance Chart",
             showlegend=True,
+            template="plotly_dark",
+            paper_bgcolor='#1e1e1e',  # Dark background
+            plot_bgcolor='#1e1e1e',   # Dark plot area
+            font=dict(color='white'), # White text
+            title_font=dict(color='white'), # White title
+            legend=dict(
+                bgcolor='rgba(30, 30, 30, 0.7)',
+                font=dict(color='white')
+            )
         )
 
-        # Save to HTML and auto-open in browser
+        # Custom HTML template with dark mode styling
+        html_template = """
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <title>Performance Charts</title>
+                            <style>
+                                body {
+                                    background-color: #1e1e1e;
+                                    color: white;
+                                    font-family: Arial, sans-serif;
+                                    margin: 0;
+                                    padding: 20px;
+                                }
+                                .header {
+                                    text-align: center;
+                                    margin-bottom: 20px;
+                                }
+                                .chart-container {
+                                    background-color: #2d2d2d;
+                                    border-radius: 8px;
+                                    padding: 10px;
+                                    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="header">
+                                <h1>Performance Charts</h1>
+                            </div>
+                            <div class="chart-container">
+                                {{ plot_div }}
+                            </div>
+                        </body>
+                        </html>
+                        """
+
+        # Save to HTML with custom template and auto-open in browser
         output_file = "performance_charts.html"
-        fig.write_html(output_file)
+        
+        # Write the HTML file with our custom template
+        with open(output_file, 'w') as f:
+            f.write(html_template.replace('{{ plot_div }}', fig.to_html(include_plotlyjs='cdn')))
+        
         webbrowser.open(output_file)
 
 
