@@ -4,6 +4,19 @@ Poniższa instrukcja krok po kroku pokaże Ci, jak przygotować środowisko i ur
 
 ---
 
+
+## 🔧 Krok 0: Pobranie podmodułów
+
+
+```bash
+git submodule update --init --recursive
+```
+
+> 💡 To polecenie pobierze podmoduły z github'a.
+
+---
+
+
 ## 🔧 Krok 1: Nadanie uprawnień do skryptów
 
 Zacznij od nadania uprawnień wykonywalnych wszystkim skryptom `.sh` w bieżącym katalogu:

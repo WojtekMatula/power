@@ -44,7 +44,7 @@ def create_weighted_model(
     df_train["weight"] = weights
 
     # Prepare X, y, and weights for the model
-    X = sm.add_constant(df_train[col_x])
+    X = sm.add_constant(df_train[col_x], has_constant="add")
     y = df_train[predicted_value]
     weights = df_train["weight"]
 
@@ -72,7 +72,7 @@ def prepare_power_model_dataframe(power_data, predicted_value):
     power_model["date"] = power_model.index.date
     power_model["hour"] = power_model.index.hour
     power_model = power_model.reset_index()
-    power_model = power_model[power_model["date"] > datetime.date(2024, 10, 10)]
+    power_model = power_model[power_model["date"] > datetime.date(2024, 1, 1)]
     power_model.set_index(["date"], inplace=True)
     return power_model
 
@@ -114,6 +114,7 @@ def process_dates(
                 X_test_forecast = sm.add_constant(
                     test_df[forecast_cols], has_constant="add"
                 )
+
                 test_df["prediction_forecast"] = result.predict(X_test_forecast)
 
                 for feature in col_x:
@@ -227,6 +228,7 @@ if __name__ == "__main__":
         weight_type=args.weight_type,
     )
     calculate_stats(result, predicted_value)
+    result = result[result["date"] > datetime.date(2024, 10, 10)]
     result.to_parquet(
         out_path / "result.parquet",
         index=True,  # Preserve index assuming it's meaningful (e.g., datetime)

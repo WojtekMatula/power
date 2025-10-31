@@ -127,6 +127,9 @@ if __name__ == "__main__":
         "avail_gen_of_gen_unit_and_energy_storage_rb": "supply_ab1_forecast",
         "grid_demand_forecast": "demand_forecast",
         "avail_gen_of_gen_unit_and_energy_storage_non_rb": "supply_nab_forecast",
+        "surplus_cap_avail_for_tso": "surplus_capacity_tso",
+        "required_power_reserve": "required_power_reserve",
+        "surplus_cap_avail_for_tso_over_pow_res": "surplus_capacity_over_reserve",
     }
 
     kse_load_forecast_rename = {"load_forecast": "demand_kse_forecast"}
