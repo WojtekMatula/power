@@ -36,8 +36,35 @@ def fix_forecasts(df: pd.DataFrame, forecast_columns) -> pd.DataFrame:
     return df
 
 
-# This is the best model for peak hours we have but for sure it can be improved
 def calculate_peak_hours_forecast(df):
+    df["generation_clean_actual"] = df["wind_actual"] + df["pv_actual"]
+    df["demand-generation-clean_actual"] = (
+        df["demand_actual"] - df["generation_clean_actual"]
+    )
+
+    df["peak_hours_top_actual"] = (
+        df["demand-generation-clean_actual"]
+        .rolling(24 * 4 * 14)
+        .quantile(0.90)
+        .shift(24 * 4 * 3)
+    )
+    df["peak_hours_bottom_actual"] = (
+        df["demand-generation-clean_actual"]
+        .rolling(24 * 4 * 14)
+        .quantile(0.10)
+        .shift(24 * 4 * 3)
+    )
+
+    df["peak_hours_actual"] = np.where(
+        df["demand-generation-clean_actual"] > df["peak_hours_top_actual"], 2, 1
+    )
+
+    df["peak_hours_actual"] = np.where(
+        df["demand-generation-clean_actual"] < df["peak_hours_bottom_actual"],
+        0,
+        df["peak_hours_actual"],
+    )
+
     df["generation_clean_forecast"] = (
         df["wind_forecast_interpolate"] + df["pv_forecast_interpolate"]
     )
@@ -45,27 +72,18 @@ def calculate_peak_hours_forecast(df):
         df["demand_kse_forecast"] - df["generation_clean_forecast"]
     )
 
-    df["peak_hours_top_forecast"] = (
-        df["demand-generation-clean_forecast"].rolling(24 * 4 * 21).quantile(0.85)
-    )
-    df["peak_hours_bottom_forecast"] = (
-        df["demand-generation-clean_forecast"].rolling(24 * 4 * 21).quantile(0.15)
+    df["peak_hours_forecast"] = np.where(
+        df["demand-generation-clean_forecast"] > df["peak_hours_top_actual"], 2, 1
     )
 
     df["peak_hours_forecast"] = np.where(
-        df["demand-generation-clean_forecast"] > df["peak_hours_top_forecast"], 2, 1
-    )
-
-    df["peak_hours_forecast"] = np.where(
-        df["demand-generation-clean_forecast"] < df["peak_hours_bottom_forecast"],
+        df["demand-generation-clean_forecast"] < df["peak_hours_bottom_actual"],
         0,
         df["peak_hours_forecast"],
     )
     # Clean up
     df = df.drop(
         columns=[
-            "peak_hours_top_forecast",
-            "peak_hours_bottom_forecast",
             "demand-generation-clean_forecast",
             "generation_clean_forecast",
         ]
@@ -124,6 +142,7 @@ if __name__ == "__main__":
         "supply_ab1_forecast",
         "demand_forecast",
         "supply_nab_forecast",
+        "surplus_capacity_over_reserve",
     ]
 
     df = load_dataframe()
